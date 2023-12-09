@@ -1,38 +1,30 @@
-import Navbar from "@/components/shared/navbar/navbar";
-import { createProj } from "@/services/projServices";
-import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
-import jwt from "jsonwebtoken";
-import { selectUser } from "@/redux/userSlice";
-import { useSelector } from "react-redux";
+import Navbar from "@/components/shared/navbar/navbar"
+import { useRouter } from "next/router"
+import { useEffect, useState } from "react"
+import jwt from "jsonwebtoken"
+import { selectUser } from "@/redux/userSlice"
+import { useSelector } from "react-redux"
 
 function CreateProj() {
-  const router = useRouter();
-  const user = useSelector(selectUser);
+  const router = useRouter()
+  const user = useSelector(selectUser)
 
-  type initProps = { pname: string; gUrl: string; fname: string };
+  type initProps = { pname: string; gUrl: string; fname: string }
   const initValues: initProps = {
     pname: "",
     gUrl: "",
     fname: "spring boot",
-  };
+  }
 
-  const [projDetails, setProjDetails] = useState<initProps>(initValues);
+  const [projDetails, setProjDetails] = useState<initProps>(initValues)
 
-  const handleSubmitBtnClick = async () => {
-    await createProj(
-      projDetails.gUrl,
-      projDetails.fname,
-      projDetails.pname,
-      router
-    );
-  };
+  const handleSubmitBtnClick = async () => {}
 
   useEffect(() => {
     if (user && !user.token) {
-      router.push("/auth/signup");
+      router.push("/auth/signup")
     }
-  }, [user]);
+  }, [user])
 
   return (
     <div className="w-full flex flex-col">
@@ -97,7 +89,7 @@ function CreateProj() {
         </div>
       </div>
     </div>
-  );
+  )
 }
 
-export default CreateProj;
+export default CreateProj

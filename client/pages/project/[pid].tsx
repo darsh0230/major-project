@@ -1,109 +1,98 @@
-import Navbar from "@/components/shared/navbar/navbar";
-import { ProjModel } from "@/models/projModel";
-import { getProj, getProjLogs, rebuildProj } from "@/services/projServices";
-import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
-import jwt from "jsonwebtoken";
-import { selectUser } from "@/redux/userSlice";
-import { useSelector } from "react-redux";
+import Navbar from "@/components/shared/navbar/navbar"
+import { ProjModel } from "@/models/projModel"
+import { useRouter } from "next/router"
+import { useEffect, useState } from "react"
+import { selectUser } from "@/redux/userSlice"
+import { useSelector } from "react-redux"
+
+import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye"
+import EditIcon from "@mui/icons-material/Edit"
+import AddIcon from "@mui/icons-material/Add"
+
+import { PageModel } from "@/models/pageModel"
+
+function PageRow({ pageModel }: { pageModel: PageModel }) {
+  return (
+    <div className="w-full p-3 px-5 flex justify-between items-center rounded-md bg-zinc-900">
+      <div className="basis-0 flex-1">{pageModel.PageName}</div>
+      <div className="basis-0 flex-1 text-center">
+        Test Cases Passed : <span className="text-green-500">5/7</span>
+      </div>
+      <div className="flex basis-0 flex-1 justify-end">
+        <button className="p-1 rounded-full hover:hover:bg-zinc-800">
+          <RemoveRedEyeIcon />
+        </button>
+        <div className="w-1" />
+        <button className="p-1 rounded-full hover:hover:bg-zinc-800">
+          <EditIcon />
+        </button>
+      </div>
+    </div>
+  )
+}
 
 function ProjDetails() {
-  const router = useRouter();
-  const user = useSelector(selectUser);
+  const router = useRouter()
+  const user = useSelector(selectUser)
 
-  const { pid } = router.query;
-  const [proj, setProj] = useState<ProjModel>();
+  const { pid } = router.query
 
-  const [logText, setLogText] = useState<string>("");
-
-  useEffect(() => {
-    async function asyncc() {
-      if (pid) setProj(await getProj(pid.toString()));
-    }
-    asyncc();
-  }, [pid]);
-
-  useEffect(() => {
-    async function asyncc() {
-      if (pid) await getProjLogs(pid.toString(), setLogText);
-    }
-    asyncc();
-  }, [pid]);
+  const [allPages, setAllPages] = useState<PageModel[]>([])
 
   useEffect(() => {
     if (user && !user.token) {
-      router.push("/auth/signup");
+      router.push("/auth/signup")
     }
-  }, [user]);
+  }, [user])
+
+  useEffect(() => {
+    setAllPages([
+      {
+        pid: "string",
+        pageId: "string",
+        PageName: "Home Page",
+        pageUrl: "string",
+        pageDescription: "string",
+        testcasesPassed: 0,
+        totalTestcases: 0,
+      },
+      {
+        pid: "string",
+        pageId: "string",
+        PageName: "Login Page",
+        pageUrl: "string",
+        pageDescription: "string",
+        testcasesPassed: 0,
+        totalTestcases: 0,
+      },
+      {
+        pid: "string",
+        pageId: "string",
+        PageName: "Sign Up Page",
+        pageUrl: "string",
+        pageDescription: "string",
+        testcasesPassed: 0,
+        totalTestcases: 0,
+      },
+    ])
+  }, [])
 
   return (
-    <div className="w-full flex flex-col">
+    <div className="w-full flex flex-col p-5 gap-y-2">
       <Navbar />
       <div className="h-32" />
+      {/* Pages */}
+      {allPages.map((pageModel, i) => (
+        <PageRow pageModel={pageModel} key={i} />
+      ))}
 
-      {/* project description section */}
-      <div className="w-full p-8">
-        <div className="w-full p-4 px-10 flex flex-col border border-white rounded-md">
-          <div className="w-full py-5 flex justify-between">
-            <div>Project Name : </div>
-            <div className="font-extralight">{proj?.pname}</div>
-          </div>
-          <div className="w-full py-5 flex justify-between">
-            <div>Github URL : </div>
-            <div className="font-extralight">{proj?.githubUrl}</div>
-          </div>
-          <div className="w-full py-5 flex justify-between">
-            <div>Framework : </div>
-            <div className="font-extralight">{proj?.frameWork}</div>
-          </div>
-          <div className="w-full py-5 flex justify-between">
-            <div>Project Status : </div>
-            <div className="font-extralight">{proj?.pStatus}</div>
-          </div>
-          <div className="w-full py-5 flex justify-between">
-            <div>Deployed URL : </div>
-            <a
-              className="font-extralight"
-              href={`http://${
-                logText
-                  .match(
-                    /[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}:[0-9]{1,5}/g
-                  )
-                  ?.toString() ?? ""
-              }/`}>
-              {logText
-                .match(
-                  /[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}:[0-9]{1,5}/g
-                )
-                ?.toString()}
-            </a>
-          </div>
-        </div>
-      </div>
+      <div className="h-4" />
 
-      <div className="w-full flex justify-center">
-        <button
-          className="w-1/3 m-4 bg-transparent hover:bg-white text-white hover:text-black py-2 px-4 border border-white hover:border-transparent rounded font-light"
-          onClick={async () => {
-            rebuildProj(router, proj?.pid ?? "");
-            await new Promise((r) => setTimeout(r, 3000));
-            window.location.reload();
-          }}>
-          Rebuild Project
-        </button>
-      </div>
-
-      <div className="h-10" />
-      {/* project logs */}
-      <div className="h-[70vh] w-full p-8">
-        <div className="w-full h-full p-4 py-8 px-10 flex flex-col bg-[#222]">
-          <div className="font-extralight overflow-y-auto whitespace-pre-line">
-            {logText}
-          </div>
-        </div>
-      </div>
+      <button className="w-full py-3 flex justify-center items-center bg-zinc-900 hover:hover:bg-zinc-800 rounded-md">
+        <AddIcon /> <div className="w-2" /> <div>Add Page</div>
+      </button>
     </div>
-  );
+  )
 }
 
-export default ProjDetails;
+export default ProjDetails

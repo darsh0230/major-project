@@ -1,8 +1,7 @@
 export type ProjModel = {
-  pid: string;
-  pname: string;
-  githubUrl: string;
-  frameWork: string;
-  fVer: string;
-  pStatus: string;
-};
+  pid: string
+  pname: string
+  projectDomain: string
+  testcasesPassed: Number
+  totalTestcases: Number
+}

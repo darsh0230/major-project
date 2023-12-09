@@ -1,79 +1,97 @@
-import Head from "next/head";
-import Navbar from "@/components/shared/navbar/navbar";
-import { useEffect, useState } from "react";
-import { deleteProj, getAllProj, rebuildProj } from "@/services/projServices";
-import { ProjModel } from "@/models/projModel";
-import CachedIcon from "@mui/icons-material/Cached";
-import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
-import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
-import { useRouter } from "next/router";
-import { useSelector } from "react-redux";
-import { selectUser } from "@/redux/userSlice";
-import jwt from "jsonwebtoken";
+import Head from "next/head"
+import Navbar from "@/components/shared/navbar/navbar"
+import { use, useEffect, useState } from "react"
+import { ProjModel } from "@/models/projModel"
+import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye"
+import { useRouter } from "next/router"
+import { useSelector } from "react-redux"
+import { selectUser } from "@/redux/userSlice"
+import Image from "next/image"
+import Link from "next/link"
 
-function AllProjectRow({ pName, status, framework, pid }: any) {
-  const router = useRouter();
-
+function ProjectCard({ proj }: { proj: ProjModel }) {
   return (
-    <tr className="border-b last:border-0">
-      <td className="border-r last:border-0 p-2 py-4 font-light text-left capitalize pl-8">
-        {pName}
-      </td>
-      <td className="border-r last:border-0 p-2 text-center font-light">
-        {status}
-      </td>
-      <td className="border-r last:border-0 p-2 text-center font-light">
-        {framework}
-      </td>
-      <td className="w-full flex justify-end border-r last:border-0 p-2 text-right font-light pr-8">
-        <button
-          className="px-2 hover:bg-slate-800 rounded-md"
-          onClick={() => {
-            router.push(`/project/${pid}`);
-          }}>
-          <RemoveRedEyeIcon />
-        </button>
-        {/*  */}
-        <button
-          className="px-2 hover:bg-slate-800 rounded-md"
-          onClick={() => {
-            rebuildProj(router, pid);
-          }}>
-          <CachedIcon />
-        </button>
-        {/*  */}
-        <button
-          className="px-2 text-red-500 hover:bg-slate-800 rounded-md"
-          onClick={() => {
-            deleteProj(pid);
-          }}>
-          <DeleteOutlinedIcon />
-        </button>
-      </td>
-    </tr>
-  );
+    <Link
+      href="/project/1"
+      className="w-full min-w-[200px] max-w-md m-5 p-3 border border-gray-600 bg-neutral-900 hover:bg-neutral-800 rounded-md">
+      <div className="w-full flex flex-col">
+        <div className="w-full flex justify-between">
+          {/* Icon */}
+          <div className="flex">
+            <div className="h-full grid place-items-center">
+              <Image
+                src={`https://${proj.projectDomain}/favicon.ico`}
+                width={48}
+                height={48}
+                alt={proj.pname}
+              />
+            </div>
+            <div className="w-4" />
+            {/* title */}
+            <div className="flex flex-col">
+              <div className="font-semibold text-lg">{proj.pname}</div>
+              <div className="h-2" />
+              <div className="text-xs text-zinc-400">{proj.projectDomain}</div>
+            </div>
+          </div>
+          {/* Other options */}
+          <div className="h-full grid place-items-center p-1 hover:bg-zinc-500 rounded-full">
+            <RemoveRedEyeIcon />
+          </div>
+        </div>
+
+        <div className="h-8" />
+
+        {/* test cases number */}
+        <div>
+          Test Cases Passed : <span className="text-green-500">5/7</span>
+        </div>
+        <div className="h-1" />
+        <div>Total Pages : 5</div>
+        <div className="h-2" />
+      </div>
+    </Link>
+  )
 }
 
 export default function Home() {
-  // var allProjs: ProjModel[];
-  const [allProjs, setAllProjs] = useState<ProjModel[]>([]);
+  const user = useSelector(selectUser)
+  const router = useRouter()
 
-  const user = useSelector(selectUser);
-  const router = useRouter();
+  const [allProjs, setAllProjs] = useState<ProjModel[]>([])
+
+  // useEffect(() => {
+  //   if (user && !user.token) {
+  //     router.push("/auth/signup")
+  //   }
+  // }, [user])
 
   useEffect(() => {
-    if (user && !user.token) {
-      router.push("/auth/signup");
-    }
-  }, [user]);
+    setAllProjs([
+      {
+        pid: "1",
+        pname: "Vercel",
+        projectDomain: "vercel.com",
+        testcasesPassed: 5,
+        totalTestcases: 5,
+      },
+      {
+        pid: "1",
+        pname: "NextJS",
+        projectDomain: "nextjs.org",
+        testcasesPassed: 5,
+        totalTestcases: 5,
+      },
+      {
+        pid: "1",
+        pname: "Google",
+        projectDomain: "google.com",
+        testcasesPassed: 5,
+        totalTestcases: 5,
+      },
+    ])
+  }, [])
 
-  useEffect(() => {
-    async function asyncc() {
-      // allProjs = await getAllProj();
-      setAllProjs(await getAllProj());
-    }
-    asyncc();
-  }, []);
   return (
     <>
       <Head>
@@ -87,42 +105,12 @@ export default function Home() {
         <div className="h-32" />
 
         {/* dashboard content */}
-        <div className="w-full p-3">
-          <table className="w-full">
-            <colgroup>
-              <col span={1} className="w-[25%]" />
-              <col span={1} className="w-[25%]" />
-              <col span={1} className="w-[25%]" />
-              <col span={1} className="w-[25%]" />
-            </colgroup>
-            <tbody>
-              <tr className="border-b">
-                <th className="border-r last:border-0 p-2 text-left pl-8">
-                  Project Name
-                </th>
-                <th className="border-r last:border-0 p-2 text-center">
-                  Status
-                </th>
-                <th className="border-r last:border-0 p-2 text-center">
-                  Framework
-                </th>
-                <th className="border-r last:border-0 p-2 text-right pr-8">
-                  Actions
-                </th>
-              </tr>
-              {allProjs.map((proj, i) => (
-                <AllProjectRow
-                  key={i}
-                  pName={proj.pname}
-                  status={proj.pStatus}
-                  framework={proj.frameWork}
-                  pid={proj.pid}
-                />
-              ))}
-            </tbody>
-          </table>
+        <div className="w-full p-3 flex flex-wrap justify-center">
+          {allProjs.map((proj, i) => (
+            <ProjectCard proj={proj} key={i} />
+          ))}
         </div>
       </main>
     </>
-  );
+  )
 }
