@@ -1,5 +1,5 @@
 export type PageModel = {
-  pid: string
+  projectId: string
   pageId: string
   PageName: string
   pageUrl: string

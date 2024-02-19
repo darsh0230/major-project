@@ -8,11 +8,14 @@ import { useSelector } from "react-redux"
 import { selectUser } from "@/redux/userSlice"
 import Image from "next/image"
 import Link from "next/link"
+import { getAllProjects } from "@/services/projects"
 
 function ProjectCard({ proj }: { proj: ProjModel }) {
+  const { hostname } = new URL(proj.projectUrl)
+
   return (
     <Link
-      href="/project/1"
+      href={`/project/${proj.pid}`}
       className="w-full min-w-[200px] max-w-md m-5 p-3 border border-gray-600 bg-neutral-900 hover:bg-neutral-800 rounded-md">
       <div className="w-full flex flex-col">
         <div className="w-full flex justify-between">
@@ -20,7 +23,7 @@ function ProjectCard({ proj }: { proj: ProjModel }) {
           <div className="flex">
             <div className="h-full grid place-items-center">
               <Image
-                src={`https://${proj.projectDomain}/favicon.ico`}
+                src={`https://${hostname}/favicon.ico`}
                 width={48}
                 height={48}
                 alt={proj.pname}
@@ -31,7 +34,7 @@ function ProjectCard({ proj }: { proj: ProjModel }) {
             <div className="flex flex-col">
               <div className="font-semibold text-lg">{proj.pname}</div>
               <div className="h-2" />
-              <div className="text-xs text-zinc-400">{proj.projectDomain}</div>
+              <div className="text-xs text-zinc-400">{hostname}</div>
             </div>
           </div>
           {/* Other options */}
@@ -44,10 +47,13 @@ function ProjectCard({ proj }: { proj: ProjModel }) {
 
         {/* test cases number */}
         <div>
-          Test Cases Passed : <span className="text-green-500">5/7</span>
+          Test Cases Passed :{" "}
+          <span className="text-green-500">
+            {proj.testcasesPassed.toString()}/{proj.totalTestcases.toString()}
+          </span>
         </div>
         <div className="h-1" />
-        <div>Total Pages : 5</div>
+        <div>Total Pages : {proj.numPages.toString()}</div>
         <div className="h-2" />
       </div>
     </Link>
@@ -67,29 +73,10 @@ export default function Home() {
   // }, [user])
 
   useEffect(() => {
-    setAllProjs([
-      {
-        pid: "1",
-        pname: "Vercel",
-        projectDomain: "vercel.com",
-        testcasesPassed: 5,
-        totalTestcases: 5,
-      },
-      {
-        pid: "1",
-        pname: "NextJS",
-        projectDomain: "nextjs.org",
-        testcasesPassed: 5,
-        totalTestcases: 5,
-      },
-      {
-        pid: "1",
-        pname: "Google",
-        projectDomain: "google.com",
-        testcasesPassed: 5,
-        totalTestcases: 5,
-      },
-    ])
+    ;(async () => {
+      const allProjs = await getAllProjects()
+      setAllProjs(allProjs ?? [])
+    })()
   }, [])
 
   return (

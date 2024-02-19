@@ -10,22 +10,31 @@ import EditIcon from "@mui/icons-material/Edit"
 import AddIcon from "@mui/icons-material/Add"
 
 import { PageModel } from "@/models/pageModel"
+import { getAllPages } from "@/services/webPages"
+import Link from "next/link"
 
-function PageRow({ pageModel }: { pageModel: PageModel }) {
+function PageRow({ page }: { page: PageModel }) {
   return (
     <div className="w-full p-3 px-5 flex justify-between items-center rounded-md bg-zinc-900">
-      <div className="basis-0 flex-1">{pageModel.PageName}</div>
+      <div className="basis-0 flex-1">{page.PageName}</div>
       <div className="basis-0 flex-1 text-center">
-        Test Cases Passed : <span className="text-green-500">5/7</span>
+        Test Cases Passed :{" "}
+        <span className="text-green-500">
+          {page.testcasesPassed.toString()}/{page.totalTestcases.toString()}
+        </span>
       </div>
       <div className="flex basis-0 flex-1 justify-end">
-        <button className="p-1 rounded-full hover:hover:bg-zinc-800">
+        <Link
+          className="p-1 rounded-full hover:hover:bg-zinc-800"
+          href={`/project/${page.projectId}/page/${page.pageId}`}>
           <RemoveRedEyeIcon />
-        </button>
+        </Link>
         <div className="w-1" />
-        <button className="p-1 rounded-full hover:hover:bg-zinc-800">
+        <Link
+          className="p-1 rounded-full hover:hover:bg-zinc-800"
+          href={`/project/${page.projectId}/edit`}>
           <EditIcon />
-        </button>
+        </Link>
       </div>
     </div>
   )
@@ -34,8 +43,6 @@ function PageRow({ pageModel }: { pageModel: PageModel }) {
 function ProjDetails() {
   const router = useRouter()
   const user = useSelector(selectUser)
-
-  const { pid } = router.query
 
   const [allPages, setAllPages] = useState<PageModel[]>([])
 
@@ -46,35 +53,11 @@ function ProjDetails() {
   }, [user])
 
   useEffect(() => {
-    setAllPages([
-      {
-        pid: "string",
-        pageId: "string",
-        PageName: "Home Page",
-        pageUrl: "string",
-        pageDescription: "string",
-        testcasesPassed: 0,
-        totalTestcases: 0,
-      },
-      {
-        pid: "string",
-        pageId: "string",
-        PageName: "Login Page",
-        pageUrl: "string",
-        pageDescription: "string",
-        testcasesPassed: 0,
-        totalTestcases: 0,
-      },
-      {
-        pid: "string",
-        pageId: "string",
-        PageName: "Sign Up Page",
-        pageUrl: "string",
-        pageDescription: "string",
-        testcasesPassed: 0,
-        totalTestcases: 0,
-      },
-    ])
+    console.log(router.query)
+    ;(async () => {
+      const allPages = await getAllPages(router.query.projectId as string)
+      setAllPages(allPages || [])
+    })()
   }, [])
 
   return (
@@ -82,15 +65,17 @@ function ProjDetails() {
       <Navbar />
       <div className="h-32" />
       {/* Pages */}
-      {allPages.map((pageModel, i) => (
-        <PageRow pageModel={pageModel} key={i} />
+      {allPages.map((page, i) => (
+        <PageRow page={page} key={i} />
       ))}
 
       <div className="h-4" />
 
-      <button className="w-full py-3 flex justify-center items-center bg-zinc-900 hover:hover:bg-zinc-800 rounded-md">
+      <Link
+        className="w-full py-3 flex justify-center items-center bg-zinc-900 hover:hover:bg-zinc-800 rounded-md"
+        href={`/project/${allPages[0]?.projectId ?? ""}/page/create`}>
         <AddIcon /> <div className="w-2" /> <div>Add Page</div>
-      </button>
+      </Link>
     </div>
   )
 }

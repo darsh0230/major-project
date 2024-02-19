@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from "mongoose"
 
 const projSchema = mongoose.Schema({
   pid: {
@@ -12,33 +12,13 @@ const projSchema = mongoose.Schema({
     type: String,
   },
 
-  githubUrl: {
-    type: String,
-    // unique: true,
-  },
+  projectUrl: { type: String },
 
-  frameWork: {
-    type: String,
-  },
+  testcasesPassed: { type: Number, default: 0 },
+  totalTestcases: { type: Number, default: 0 },
+  numPages: { type: Number, default: 0 },
+})
 
-  fVer: {
-    type: String,
-  },
+const projModel = mongoose.model("Proj", projSchema)
 
-  awsCred: {
-    userId: {
-      type: String,
-    },
-    secret: {
-      type: String,
-    },
-  },
-
-  pStatus: {
-    type: String,
-  },
-});
-
-const projModel = mongoose.model("Proj", projSchema);
-
-export default projModel;
+export default projModel
