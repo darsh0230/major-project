@@ -1,5 +1,5 @@
 import ProjectModel from "../models/projModel.js"
-import WebPageModel from "../models/webpageModel.js"
+import WebPageModel from "../models/webPageModel.js"
 import { StatusCodes } from "http-status-codes"
 import { BadRequestError, UnauthenticatedError } from "../utils/errors.js"
 
