@@ -1,4 +1,4 @@
-import WebPageModel from "../models/webpageModel.js"
+import WebPageModel from "../models/webPageModel.js"
 import TestCaseModel from "../models/testCasesModel.js"
 import { StatusCodes } from "http-status-codes"
 import { BadRequestError, UnauthenticatedError } from "../utils/errors.js"
