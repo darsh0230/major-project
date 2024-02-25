@@ -1,30 +1,40 @@
 import Navbar from "@/components/shared/navbar/navbar"
 import { useRouter } from "next/router"
 import { useEffect, useState } from "react"
-import jwt from "jsonwebtoken"
 import { selectUser } from "@/redux/userSlice"
 import { useSelector } from "react-redux"
-import { createProject } from "@/services/projects"
+import { addPage } from "@/services/webPages"
 
 function CreateProj() {
   const router = useRouter()
   const user = useSelector(selectUser)
 
-  type initProps = { pname: string; projectUrl: string }
+  type initProps = {
+    pageName: string
+    pageUrl: string
+    pageDescription: string
+    projectId: string
+  }
   const initValues: initProps = {
-    pname: "",
-    projectUrl: "",
+    pageName: "",
+    pageUrl: "",
+    pageDescription: "",
+    projectId: "",
   }
 
-  const [projDetails, setProjDetails] = useState<initProps>(initValues)
+  const [pageDetails, setPageDetails] = useState<initProps>(initValues)
 
   const handleSubmitBtnClick = async () => {
-    if (!projDetails.pname || !projDetails.projectUrl) {
+    if (
+      !pageDetails.pageName ||
+      !pageDetails.pageUrl ||
+      !pageDetails.pageDescription
+    ) {
       return
     }
 
-    if (await createProject(projDetails)) {
-      router.push("/")
+    if (await addPage(pageDetails)) {
+      router.push(`/project/${router.query.projectId}`)
     }
   }
 
@@ -33,6 +43,15 @@ function CreateProj() {
       router.push("/auth/signup")
     }
   }, [user])
+
+  useEffect(() => {
+    if (router.query.projectId) {
+      setPageDetails((f) => ({
+        ...f,
+        projectId: router.query.projectId as string,
+      }))
+    }
+  }, [router])
 
   return (
     <div className="w-full flex flex-col">
@@ -44,12 +63,12 @@ function CreateProj() {
         <div className="w-full h-full flex flex-col border-2 border-white rounded-md">
           {/* name */}
           <div className="flex justify-between items-center p-8">
-            <div>Project Name : </div>
+            <div>Page Name : </div>
             <input
               type="text"
-              value={projDetails.pname}
+              value={pageDetails.pageName}
               onChange={(v) =>
-                setProjDetails((f) => ({ ...f, pname: v.target.value }))
+                setPageDetails((f) => ({ ...f, pageName: v.target.value }))
               }
               className={
                 "p-2.5 pl-11 bg-transparent border text-sm rounded-md border-gray-400 focus:border-white"
@@ -57,14 +76,32 @@ function CreateProj() {
             />
           </div>
 
-          {/* github */}
+          {/* url */}
           <div className="flex justify-between items-center p-8">
-            <div>Project Url : </div>
+            <div>Page Url : </div>
             <input
               type="text"
-              value={projDetails.projectUrl}
+              value={pageDetails.pageUrl}
               onChange={(v) =>
-                setProjDetails((f) => ({ ...f, projectUrl: v.target.value }))
+                setPageDetails((f) => ({ ...f, pageUrl: v.target.value }))
+              }
+              className={
+                "w-1/2 p-2.5 pl-11 bg-transparent border text-sm rounded-md border-gray-400 focus:border-white"
+              }
+            />
+          </div>
+
+          {/* desc */}
+          <div className="flex justify-between items-center p-8">
+            <div>Page Description : </div>
+            <input
+              type="text"
+              value={pageDetails.pageDescription}
+              onChange={(v) =>
+                setPageDetails((f) => ({
+                  ...f,
+                  pageDescription: v.target.value,
+                }))
               }
               className={
                 "w-1/2 p-2.5 pl-11 bg-transparent border text-sm rounded-md border-gray-400 focus:border-white"
@@ -76,7 +113,7 @@ function CreateProj() {
           <button
             className="m-4 bg-transparent hover:bg-white text-white hover:text-black py-2 px-4 border border-white hover:border-transparent rounded font-light"
             onClick={handleSubmitBtnClick}>
-            Create Project
+            Add Page
           </button>
         </div>
       </div>

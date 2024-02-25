@@ -5,9 +5,9 @@ const testCaseSchema = mongoose.Schema({
   projectId: { type: String },
   uid: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   testCaseName: { type: String },
-  isPassed: { type: Boolean },
+  isPassed: { type: Boolean, default: false },
   code: { type: String },
-  resultMsg: { type: String },
+  resultMsg: { type: String, default: "" },
 })
 
 const testCaseModel = mongoose.model("TestCase", testCaseSchema)

@@ -1,8 +1,7 @@
-import WebPageModel from "../models/webPageModel.js"
 import ProjectModel from "../models/projModel.js"
+import WebPageModel from "../models/webpageModel.js"
 import { StatusCodes } from "http-status-codes"
 import { BadRequestError, UnauthenticatedError } from "../utils/errors.js"
-import { exec } from "child_process"
 
 import crypto from "crypto"
 
@@ -32,7 +31,7 @@ export const createWebPage = async (req, res) => {
   }
 
   res
-    .status(StatusCodes.OK)
+    .status(StatusCodes.CREATED)
     .json({ result: { msg: "Webpage added successfully" } })
 }
 

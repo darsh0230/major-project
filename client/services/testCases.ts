@@ -1,11 +1,15 @@
-import { PageModel } from "@/models/pageModel"
+import { TestCaseModel } from "@/models/testCaseModel"
 import axios from "axios"
 
-export async function getAllPages(
-  projectId: string
-): Promise<PageModel[] | null> {
+export async function getAllTestcases(
+  projectId: string,
+  pageid: string
+): Promise<TestCaseModel[] | null> {
   if (!process.env.NEXT_PUBLIC_SERVER_URL) throw "Server Url Not Set"
-  const url = process.env.NEXT_PUBLIC_SERVER_URL + `/page/${projectId}/getAll`
+  const url =
+    process.env.NEXT_PUBLIC_SERVER_URL +
+    "/testCases/getAllTestCases" +
+    `?projectId=${projectId}&pageId=${pageid}`
   const token = localStorage.getItem("Token")
 
   try {
@@ -26,19 +30,18 @@ export async function getAllPages(
   return null
 }
 
-export async function addPage(pageDetails: any): Promise<boolean> {
+export async function updateTestCaseCode(testCaseId: string, code: string) {
   if (!process.env.NEXT_PUBLIC_SERVER_URL) throw "Server Url Not Set"
-  const url = process.env.NEXT_PUBLIC_SERVER_URL + "/page/create"
+  const url =
+    process.env.NEXT_PUBLIC_SERVER_URL + "/testCases/updateTestCaseCode"
   const token = localStorage.getItem("Token")
 
   try {
     var res = await axios.post(
       url,
       {
-        pageName: pageDetails.pageName,
-        pageUrl: pageDetails.pageUrl,
-        pageDescription: pageDetails.pageDescription,
-        projectId: pageDetails.projectId,
+        testCaseId: testCaseId,
+        code: code,
       },
       {
         headers: {
@@ -48,7 +51,7 @@ export async function addPage(pageDetails: any): Promise<boolean> {
       }
     )
 
-    if (res.status === 201) {
+    if (res.status === 200) {
       return true
     }
   } catch (e: any) {

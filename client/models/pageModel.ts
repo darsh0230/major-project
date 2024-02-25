@@ -1,7 +1,7 @@
 export type PageModel = {
   projectId: string
   pageId: string
-  PageName: string
+  pageName: string
   pageUrl: string
   pageDescription: string
   testcasesPassed: Number

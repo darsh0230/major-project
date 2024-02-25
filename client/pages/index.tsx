@@ -46,13 +46,13 @@ function ProjectCard({ proj }: { proj: ProjModel }) {
         <div className="h-8" />
 
         {/* test cases number */}
-        <div>
+        {/* <div>
           Test Cases Passed :{" "}
           <span className="text-green-500">
             {proj.testcasesPassed.toString()}/{proj.totalTestcases.toString()}
           </span>
         </div>
-        <div className="h-1" />
+        <div className="h-1" /> */}
         <div>Total Pages : {proj.numPages.toString()}</div>
         <div className="h-2" />
       </div>
