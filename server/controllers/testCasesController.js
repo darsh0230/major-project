@@ -1,8 +1,11 @@
 import WebPageModel from "../models/webPageModel.js"
 import TestCaseModel from "../models/testCasesModel.js"
+import ExecutionQueueModel from "../models/executionQueueModel.js"
 import { StatusCodes } from "http-status-codes"
 import { BadRequestError, UnauthenticatedError } from "../utils/errors.js"
-import { exec } from "child_process"
+import cypress from "cypress"
+import crypto from "crypto"
+import fs from "fs"
 
 function generateTestCaseList(pageDesc) {
   return [
@@ -20,7 +23,7 @@ function generateTestCaseList(pageDesc) {
 }
 
 function generateTestCase(pageDesc, url, testCase) {
-  return `console.log('Hello World')`
+  return `cy.visit("https://devqa.vercel.app");`
 }
 
 export const generateTestCases = async (req, res) => {
@@ -86,8 +89,57 @@ export const generateTestCases = async (req, res) => {
 
 // ----------------------------------------------------------------------
 
-function executeCode(code) {
-  return { isPassed: true, resultMsg: "Test Passed" }
+function CypressTemplate(testCase) {
+  return `describe('${testCase._id.toString()}', () => {
+    it('${testCase.testCaseName}', () => {
+      ${testCase.code}
+    })
+  })\n\n`
+}
+
+async function executeCypressCode(testCases, sessionId) {
+  const execQueueData = []
+  var cypressCode = ""
+  for (let i = 0; i < testCases.length; i++) {
+    const testCase = testCases[i]
+    execQueueData.push({
+      sessionId,
+      testCaseId: testCase._id,
+      testCaseName: testCase.testCaseName,
+    })
+
+    cypressCode += CypressTemplate(testCase)
+  }
+
+  await ExecutionQueueModel.insertMany(execQueueData)
+
+  try {
+    const folderName = "./cypress/e2e/" + testCases[0].projectId
+    if (!fs.existsSync(folderName)) {
+      fs.mkdirSync(folderName)
+    }
+    fs.writeFile(`${folderName}/${sessionId}.cy.js`, cypressCode, (err) => {
+      if (err) {
+        console.error(err)
+      } else {
+        // file written successfully
+      }
+    })
+  } catch (err) {
+    console.error(err)
+  }
+
+  cypress
+    .run({
+      headed: true,
+      spec: `./cypress/e2e/${testCases[0].projectId}/${sessionId}.cy.js`,
+    })
+    .then((results) => {
+      console.log("cypress run finished", results)
+    })
+    .catch((err) => {
+      console.log("cypress run failed", err)
+    })
 }
 
 export const executeTestCases = async (req, res) => {
@@ -96,6 +148,7 @@ export const executeTestCases = async (req, res) => {
 
   const { projectId, pageIds, testCasesIds } = req.body
   const uid = req.user.uid
+  const sessionId = crypto.randomBytes(10).toString("hex")
   if (!projectId) {
     throw new BadRequestError("Project Id is required")
   }
@@ -110,27 +163,38 @@ export const executeTestCases = async (req, res) => {
   const testCases = await TestCaseModel.find(queryObject)
 
   res.write(`Executing test cases for project : ${projectId} \n\n`)
-  for (let i = 0; i < testCases.length; i++) {
-    const testCase = testCases[i]
-    res.write(`Executing test case : ${testCase.testCaseName} \n`)
-    const result = executeCode(testCase.code)
-    await TestCaseModel.updateOne(
-      { _id: testCase._id },
-      { isPassed: result.isPassed, resultMsg: result.resultMsg }
-    )
 
-    // get count of passed test cases
-    const passedCount = await TestCaseModel.countDocuments({
-      projectId,
-      webPageId: testCase.webPageId,
-      isPassed: true,
+  await executeCypressCode(testCases, sessionId)
+
+  while (
+    await ExecutionQueueModel.countDocuments({
+      sessionId,
+      executionStatus: "pending",
     })
-
-    await WebPageModel.updateOne(
-      { pageId: testCase.webPageId, uid },
-      { testcasesPassed: passedCount }
-    )
+  ) {
+    const currExec = await ExecutionQueueModel.findOne({
+      sessionId,
+      executionStatus: "started",
+    })
+    if (currExec) {
+      res.write(`Executing test case : ${currExec.testCaseName} \n`)
+    }
+    await new Promise((resolve) => setTimeout(resolve, 1000))
   }
+
+  await new Promise((resolve) => setTimeout(resolve, 2000))
+  // get count of passed test cases
+  const passedCount = await TestCaseModel.countDocuments({
+    projectId,
+    webPageId: testCases[0].webPageId,
+    isPassed: true,
+  })
+
+  await WebPageModel.updateOne(
+    { pageId: testCases[0].webPageId, uid },
+    { testcasesPassed: passedCount }
+  )
+
   res.write("\nProcess Successfully Completed \n")
   res.end()
 }
@@ -175,4 +239,42 @@ export const updateTestCaseCode = async (req, res) => {
   await TestCaseModel.updateOne({ _id: testCaseId, uid }, { code })
 
   res.status(StatusCodes.OK).json({ result: "Test case updated successfully" })
+}
+
+// ----------------------------------------------------------------------
+
+export const updateTestCaseStatus = async (req, res) => {
+  const { testCaseId, isPassed, resultMsg, sessionId } = req.body
+
+  if (!testCaseId || !isPassed || !resultMsg) {
+    throw new BadRequestError("All fields are required")
+  }
+
+  await TestCaseModel.updateOne({ _id: testCaseId }, { isPassed, resultMsg })
+
+  if (sessionId) {
+    await ExecutionQueueModel.updateOne(
+      { testCaseId, sessionId },
+      { executionStatus: "completed" }
+    )
+  }
+
+  res.status(StatusCodes.OK).json({ result: "Test case updated successfully" })
+}
+
+export const updateExecutionStatus = async (req, res) => {
+  const { testCaseId, sessionId } = req.body
+
+  if (!testCaseId || !sessionId) {
+    throw new BadRequestError("All fields are required")
+  }
+
+  await ExecutionQueueModel.updateOne(
+    { testCaseId, sessionId },
+    { executionStatus: "started" }
+  )
+
+  res
+    .status(StatusCodes.OK)
+    .json({ result: "Execution status updated successfully" })
 }

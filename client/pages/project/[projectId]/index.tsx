@@ -128,7 +128,7 @@ function ProjDetails() {
 
         <Link
           className="w-full py-3 flex justify-center items-center bg-zinc-900 hover:hover:bg-zinc-800 rounded-md"
-          href={`/project/${allPages[0]?.projectId ?? "1"}/page/create`}>
+          href={`/project/${router.query.projectId ?? ""}/page/create`}>
           <AddIcon /> <div className="w-2" /> <div>Add Page</div>
         </Link>
       </div>

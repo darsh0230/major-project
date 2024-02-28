@@ -7,6 +7,8 @@ import {
   getAllTestCases,
   getTestCase,
   updateTestCaseCode,
+  updateTestCaseStatus,
+  updateExecutionStatus,
 } from "../controllers/testCasesController.js"
 
 const router = express.Router()
@@ -16,5 +18,8 @@ router.post("/execute", auth, executeTestCases)
 router.get("/getAllTestCases", auth, getAllTestCases)
 router.get("/getTestCase/:testCaseId", auth, getTestCase)
 router.post("/updateTestCaseCode", auth, updateTestCaseCode)
+
+router.post("/updateTestCaseStatus", updateTestCaseStatus)
+router.post("/updateExecutionStatus", updateExecutionStatus)
 
 export default router

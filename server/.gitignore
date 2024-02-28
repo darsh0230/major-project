@@ -1,2 +1,6 @@
 /node_modules
 .env
+/mochawesome-report
+/cypress/screenshots
+/cypress/videos
+/cypress/e2e

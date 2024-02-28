@@ -22,7 +22,7 @@ function PageLinks() {
 function UserAuth({ isLoggedIn }: { isLoggedIn: boolean }) {
   // const [showAuth, setShowAuth] = useState<boolean>(true)
 
-  const user = useSelector(selectUser)
+  // const user = useSelector(selectUser)
   const dispatch = useDispatch()
 
   const router = useRouter()

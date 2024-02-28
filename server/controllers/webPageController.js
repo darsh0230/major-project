@@ -24,7 +24,7 @@ export const createWebPage = async (req, res) => {
     pageDescription,
   })
 
-  await ProjectModel.updateOne({ projectId }, { $inc: { numPages: 1 } })
+  await ProjectModel.updateOne({ projectId, uid }, { $inc: { numPages: 1 } })
 
   if (!webPage) {
     throw new BadRequestError("WebPage creation failed")
