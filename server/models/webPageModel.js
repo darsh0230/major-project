@@ -12,6 +12,8 @@ const webPageSchema = mongoose.Schema({
   pageUrl: { type: String },
   pageDescription: { type: String },
 
+  testCasesNames: { type: [String], default: [] },
+
   testcasesPassed: { type: Number, default: 0 },
   totalTestcases: { type: Number, default: 0 },
 })

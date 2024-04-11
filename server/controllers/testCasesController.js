@@ -6,25 +6,11 @@ import { BadRequestError, UnauthenticatedError } from "../utils/errors.js"
 import cypress from "cypress"
 import crypto from "crypto"
 import fs from "fs"
-
-function generateTestCaseList(pageDesc) {
-  return [
-    "Verify that both email and password fields are present",
-    "Verify that the email field accepts valid email addresses",
-    "Verify that the email field does not accept invalid email formats",
-    "Verify that the password field accepts input",
-    "Verify that the password field hides the entered characters",
-    // "Verify that the login button is present",
-    // "Verify that clicking on the login button with empty fields does not proceed with login",
-    // "Verify that clicking on the login button with only email filled does not proceed with login",
-    // "Verify that clicking on the login button with only password filled does not proceed with login",
-    // "Verify that clicking on the login button with both email and password filled proceeds with login",
-  ]
-}
-
-function generateTestCase(pageDesc, url, testCase) {
-  return `cy.visit("https://devqa.vercel.app");`
-}
+import {
+  lang_generate_test_cases,
+  lang_generate_test_case_code,
+} from "../utils/langchain.js"
+import { logger } from "../utils/logger.js"
 
 export const generateTestCases = async (req, res) => {
   res.setHeader("Content-Type", "text/plain")
@@ -50,12 +36,19 @@ export const generateTestCases = async (req, res) => {
     const page = pages[i]
     res.write(`\nGenerating test cases for page : ${page.pageName} \n`)
 
-    const testCasesList = generateTestCaseList(page.pageDescription)
+    const testCasesList = await lang_generate_test_cases(
+      page.pageDescription,
+      page.testCasesNames
+    )
+    logger.info(`Generated a list of test cases \n ${testCasesList.join("\n")}`)
+    res.write(`\nGenerated a list of test cases\n`)
+
+    // const testCasesList = generateTestCaseList(page.pageDescription)
 
     // for each test case
     for (let j = 0; j < testCasesList.length; j++) {
       res.write(`Generating test case : ${testCasesList[j]} \n`)
-      const testCaseCode = generateTestCase(
+      const testCaseCode = await lang_generate_test_case_code(
         page.pageDescription,
         page.pageUrl,
         testCasesList[j]
@@ -76,7 +69,7 @@ export const generateTestCases = async (req, res) => {
 
       await WebPageModel.updateOne(
         { pageId: page.pageId, uid },
-        { totalTestcases: testCasecount }
+        { totalTestcases: testCasecount, testCasesNames: testCasesList }
       )
     }
   }
