@@ -12,6 +12,29 @@ import {
 } from "../utils/langchain.js"
 import { logger } from "../utils/logger.js"
 
+export const generateTestCase = async (req, res) => {
+  const { projectId, pageId, testCaseName, testCaseId } = req.body
+  const uid = req.user.uid
+
+  if (!projectId) {
+    throw new BadRequestError("Project Id is required")
+  }
+  const page = await WebPageModel.findOne({ projectId, uid, pageId })
+  if (!page) {
+    throw new BadRequestError("WebPage not found")
+  }
+
+  const testCaseCode = await lang_generate_test_case_code(
+    page.pageDescription,
+    page.pageUrl,
+    testCaseName
+  )
+
+  await TestCaseModel.updateOne({ _id: testCaseId }, { code: testCaseCode })
+
+  return res.status(StatusCodes.OK).json({ result: { code: testCaseCode } })
+}
+
 export const generateTestCases = async (req, res) => {
   res.setHeader("Content-Type", "text/plain")
   res.setHeader("Transfer-Encoding", "chunked")

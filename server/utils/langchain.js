@@ -95,12 +95,14 @@ Test case: ${test_case}
 
   logger.info(`Generated test case code for test case: ${test_case}`)
   const chat_response = await run_langchain(system_message, user_message)
-  logger.info(`Generated test case code (before formatting): ${chat_response}`)
+  logger.info(
+    `Generated test case code (before formatting): \n${chat_response}`
+  )
 
   var x = -1
   var y = -1
   var i = 1
-  while (i <= chat_response.length / 2) {
+  while (i <= chat_response.length) {
     if (chat_response.at(i) == "{") {
       x = i
     }
@@ -111,7 +113,7 @@ Test case: ${test_case}
   }
 
   logger.info(
-    `Generated test case code (after formatting): ${chat_response.slice(
+    `Generated test case code (after formatting): \n${chat_response.slice(
       x + 1,
       y
     )}`

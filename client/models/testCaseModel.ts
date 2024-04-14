@@ -1,7 +1,7 @@
 export type TestCaseModel = {
   _id: string
   pid: string
-  pageId: string
+  webPageId: string
   testCaseId: string
   projectId: string
   testCaseName: string

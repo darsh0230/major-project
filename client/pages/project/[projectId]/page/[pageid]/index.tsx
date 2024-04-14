@@ -4,6 +4,7 @@ import { useRouter } from "next/router"
 import { useEffect, useState } from "react"
 import { selectUser } from "@/redux/userSlice"
 import { useSelector } from "react-redux"
+import ReplayIcon from "@mui/icons-material/Replay"
 
 import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye"
 import MemoryIcon from "@mui/icons-material/Memory"
@@ -16,11 +17,12 @@ import { highlight, languages, highlightElement } from "prismjs"
 
 import { TestCaseModel } from "@/models/testCaseModel"
 import { getAllTestcases, updateTestCaseCode } from "@/services/testCases"
-import { executeTestCases } from "@/services/executeTestCases"
+import { executeTestCases, generateTestCase } from "@/services/executeTestCases"
 
 function PageRow({ testCase }: { testCase: TestCaseModel }) {
   const [code, setCode] = useState(testCase.code)
   const [loadingExecute, setLoadingExecute] = useState(false)
+  const [loadingRegenerate, setLoadingRegenerate] = useState(false)
 
   return (
     <div className="w-full p-3 px-5 flex flex-col rounded-md bg-zinc-900">
@@ -100,6 +102,26 @@ function PageRow({ testCase }: { testCase: TestCaseModel }) {
           }}>
           <MemoryIcon fontSize="small" /> <div className="w-2" />{" "}
           <div>{loadingExecute ? "Executing..." : "Execute Code"}</div>
+        </button>
+
+        {/* regenerate button */}
+        <button
+          className="p-3 flex items-center bg-zinc-900 hover:hover:bg-zinc-800 rounded-md"
+          onClick={async () => {
+            setLoadingRegenerate(true)
+            const res = await generateTestCase({
+              projectId: testCase.projectId,
+              testCaseId: testCase._id,
+              testCaseName: testCase.testCaseName,
+              pageId: testCase.webPageId,
+            })
+            if (res) {
+              setCode(res)
+            }
+            setLoadingRegenerate(false)
+          }}>
+          <ReplayIcon fontSize="small" /> <div className="w-2" />{" "}
+          <div>{loadingRegenerate ? "Loading..." : "Regenerate Code"}</div>
         </button>
       </div>
     </div>
