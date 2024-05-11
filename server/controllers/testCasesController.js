@@ -106,8 +106,11 @@ export const generateTestCases = async (req, res) => {
 // ----------------------------------------------------------------------
 
 function CypressTemplate(testCase) {
+  console.log(`${testCase.testCaseName.replace('"', "").replace("'", "")}`)
   return `describe('${testCase._id.toString()}', () => {
-    it('${testCase.testCaseName}', () => {
+    it('${testCase.testCaseName
+      .replaceAll('"', "")
+      .replaceAll("'", "")}', () => {
       ${testCase.code}
     })
   })\n\n`
